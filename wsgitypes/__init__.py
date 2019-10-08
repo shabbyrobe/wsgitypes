@@ -142,8 +142,6 @@ Headers = t.List[t.Tuple[str, str]]
 StartResponse = t.Callable[[str, Headers], None]
 Response = t.Iterable[bytes]
 
-TEnviron = t.TypeVar("TEnviron", bound=Environ, contravariant=True)
-
 # When called by the server, the application object must return an iterable
 # yielding zero or more bytestrings. This can be accomplished in a variety of
 # ways, such as by returning a list of bytestrings, or by the application being
@@ -151,7 +149,24 @@ TEnviron = t.TypeVar("TEnviron", bound=Environ, contravariant=True)
 # class whose instances are iterable. Regardless of how it is accomplished, the
 # application object must always return an iterable yielding zero or more
 # bytestrings.
-class Application(tx.Protocol[TEnviron]):
-    def __call__(self, environ: TEnviron, start_response: StartResponse) -> Response:
+#
+# NOTE: when using this from mypy, you may wish to extend your Environ. This
+# can be done using TypedDict inheritance, though you will need to use a
+# `cast` before you use your inherited Environ:
+#
+#   class MoreSpecificEnviron(wsgitypes.Environ):
+#       HTTP_X_EXTRA: str
+#
+#   class MyApplication(wsgitypes.Application):
+#       def __call__(self, environ: wsgitypes.Environ, start_response: wsgitypes.StartResponse) -> wsgitypes.Response:
+#           environ = typing.cast(MoreSpecificEnviron, environ)
+#           environ.get("HTTP_X_EXTRA")
+#           return []
+# 
+# An attempt was made to use a type param for Environ, but it wasn't viable:
+# https://github.com/python/mypy/issues/7654
+#       
+class Application(tx.Protocol):
+    def __call__(self, environ: Environ, start_response: StartResponse) -> Response:
         ...
 

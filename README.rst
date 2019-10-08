@@ -11,27 +11,44 @@ protocol things can satisfy rather than a set of types for something concrete.
 This package came together during an exploration documented here:
 https://github.com/python/mypy/issues/7654
 
-Define your own extensions to ``Environ`` like so::
+Define a callable application as a class:
 
-    class MyEnviron(wsgitypes.Environ):
-        HTTP_X_MY_HEADER: t.Optional[str]
-
-Define a callable application as a class::
+.. code-block:: py
 
     class MyApplication(wsgitypes.Application[MyEnviron]):
         def __call__(
             self, 
-            environ: MyEnviron,
+            environ: Environ,
             start_response: wsgitypes.StartResponse,
         ) -> wsgitypes.ResponseBody:
-            my_header = environ.get("HTTP_X_MY_HEADER", "")
+            my_header = environ.get("REQUEST_METHOD", "")
             return []
 
-Environ should be type-safe::
+Environ should be type-safe:
 
-    class MyApplication(wsgitypes.Application[MyEnviron]):
-        def __call__(self, environ: MyEnviron, start_response: wsgitypes.StartResponse) -> wsgitypes.ResponseBody:
+.. code-block:: py
+
+    class MyApplication(wsgitypes.Application):
+        def __call__(self, environ: Environ, start_response: wsgitypes.StartResponse) -> wsgitypes.ResponseBody:
             environ["wsgi.input"] # Good
             environ["wsgi.unpot"] # BORK! MyPy will catch this.
             return []
+
+You can define your own extensions to ``Environ`` using ``TypedDict`` inheritance,
+like so:
+
+.. code-block:: py
+
+    class MyEnviron(wsgitypes.Environ):
+        HTTP_X_MY_HEADER: t.Optional[str]
+    
+    class MyApplication(wsgitypes.Application):
+        def __call__(self, environ: wsgitypes.Environ, start_response: wsgitypes.StartResponse) -> wsgitypes.Response:
+            environ = typing.cast(MyEnviron, environ)
+            environ.get("HTTP_X_MY_HEADER")
+            return []
+
+Note that you need to use ``typing.cast`` to convert the incoming environ to your derived
+version. An attempt was made to use a type param for Environ, but it wasn't viable:
+https://github.com/python/mypy/issues/7654
 

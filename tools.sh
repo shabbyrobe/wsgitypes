@@ -7,14 +7,18 @@ cmd-deploy() {
     python3 -m twine upload dist/*
 }
 
+cmd-venv() {
+    python -m virtualenv .
+}
+
 cmd-test() {
     pushd "$script_abspath/wsgitypes" > /dev/null
-        mypy -- *.py
+        mypy --strict -- *.py
     popd > /dev/null
 
     # This test setup is based on the instructions here:
     # https://sobolevn.me/2019/08/testing-mypy-types
-    # pytest --mypy-ini-file=setup.cfg
+    pytest --mypy-ini-file=setup.cfg
 }
 
 "cmd-$1" "${@:2}"
