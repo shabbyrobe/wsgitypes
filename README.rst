@@ -15,12 +15,14 @@ Define a callable application as a class:
 
 .. code-block:: py
 
-    class MyApplication(wsgitypes.Application[MyEnviron]):
+    import wsgitypes
+    
+    class MyApplication(wsgitypes.Application):
         def __call__(
             self, 
-            environ: Environ,
+            environ: wsgitypes.Environ,
             start_response: wsgitypes.StartResponse,
-        ) -> wsgitypes.ResponseBody:
+        ) -> wsgitypes.Response:
             my_header = environ.get("REQUEST_METHOD", "")
             return []
 
@@ -29,7 +31,11 @@ Environ should be type-safe:
 .. code-block:: py
 
     class MyApplication(wsgitypes.Application):
-        def __call__(self, environ: Environ, start_response: wsgitypes.StartResponse) -> wsgitypes.ResponseBody:
+        def __call__(
+            self,
+            environ: wsgitypes.Environ,
+            start_response: wsgitypes.StartResponse,
+        ) -> wsgitypes.Response:
             environ["wsgi.input"] # Good
             environ["wsgi.unpot"] # BORK! MyPy will catch this.
             return []
@@ -43,12 +49,16 @@ like so:
         HTTP_X_MY_HEADER: t.Optional[str]
     
     class MyApplication(wsgitypes.Application):
-        def __call__(self, environ: wsgitypes.Environ, start_response: wsgitypes.StartResponse) -> wsgitypes.Response:
+        def __call__(
+            self,
+            environ: MyEnviron,
+            start_response: wsgitypes.StartResponse,
+        ) -> wsgitypes.Response:
             environ = typing.cast(MyEnviron, environ)
-            environ.get("HTTP_X_MY_HEADER")
+            environ.get("HTTP_X_MY_HEADER") # Good
             return []
 
-Note that you need to use ``typing.cast`` to convert the incoming environ to your derived
-version. An attempt was made to use a type param for Environ, but it wasn't viable:
-https://github.com/python/mypy/issues/7654
+Note that you need to use ``typing.cast`` to convert the incoming `Environ` to your
+derived version. An attempt was made to use a type param for Environ, but it wasn't
+viable (even with GVR helping!): https://github.com/python/mypy/issues/7654
 
