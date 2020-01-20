@@ -1,9 +1,10 @@
-Experimental WSGI Types for Python
-==================================
+WSGI Types for Python
+=====================
 
 This is an attempt to bring some type safety to WSGI applications using Python's new
-typing features (TypedDicts, Protocols). It seems to work OK but it'll be full of gaps,
-holes, bugs, missteps, etc. I would not recommend depending on it.
+typing features (TypedDicts, Protocols). It seems to work OK but may still be full of gaps,
+holes, bugs, missteps, etc. It helped bring a lot of extra safety to a couple of places
+that really needed it though, and seemed to remain quite stable for a couple of months.
 
 This is implemented as a Python module, rather than MyPy stubs, as it represents a
 protocol things can satisfy rather than a set of types for something concrete.
