@@ -4,7 +4,7 @@ from typing import List
 
 from setuptools import find_packages
 
-__version__ = "0.0.1"
+__version__ = "0.0.4"
 
 
 with open('README.rst', 'r') as f:
@@ -12,12 +12,12 @@ with open('README.rst', 'r') as f:
 
 
 dependencies = [
-    'mypy>=0.720',
+    'mypy>=0.730',
     'typing-extensions',
 ]
 
 setup(
-    name="wsgitypes-stubs",
+    name="wsgitypes",
     version=__version__,
     description='MyPy types for WSGI',
     long_description=readme,
@@ -27,12 +27,13 @@ setup(
     author="Blake Williams",
     author_email="code@shabbyrobe.org",
     py_modules=[],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     install_requires=dependencies,
     packages=[
         'wsgitypes',
         *find_packages(exclude=['scripts']),
     ],
+    package_data={"wsgitypes": ["py.typed"]},
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
